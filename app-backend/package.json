@@ -1,0 +1,14 @@
+{
+  "name": "ecommerce-inventory-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "seed": "node -r dotenv/config seed.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "mongodb": "^6.18.0",
+    "mongoose": "^8.17.1"
+  }
+}
