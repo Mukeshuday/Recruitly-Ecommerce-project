@@ -1,0 +1,9 @@
+/* Ant Design resets */
+@import 'antd/dist/reset.css';
+
+/* AG Grid theme */
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-alpine.css';
+
+html, body, #__next { height: 100%; }
+body { margin: 0; }
