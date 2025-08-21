@@ -1,14 +1,48 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+// eslint.config.mjs
+import js from "@eslint/js";
+import globals from "globals";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+export default [
+  // Base recommended rules
+  js.configs.recommended,
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+  {
+    files: ["/*.{js,jsx}"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: globals.browser, // enables browser globals like window, document
+      parserOptions: {
+        ecmaFeatures: { jsx: true }, // enables JSX parsing
+      },
+    },
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
+      "jsx-a11y": jsxA11y,
+    },
+    rules: {
+      // React-specific rules
+      "react/react-in-jsx-scope": "off", // Not needed for React 17+
+      "react/prop-types": "off", // Disable if not using PropTypes
+      "react/jsx-uses-react": "off", // Not needed for React 17+
+      "react/jsx-uses-vars": "warn",
 
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
+      // React hooks rules
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
 
-export default eslintConfig;
+      // JSX accessibility rules
+      "jsx-a11y/alt-text": "warn",
+      "jsx-a11y/anchor-is-valid": "warn",
+    },
+    settings: {
+      react: {
+        version: "detect", // Automatically detect the React version
+      },
+    },
+  },
+];

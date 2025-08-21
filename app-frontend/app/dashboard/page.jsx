@@ -13,11 +13,13 @@ export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      // ✅ Use relative API path (goes through Next.js rewrite)
-      const res = await fetch("/api/dashboard");
+      // ✅ Use backend API from .env
+      const res = await fetch(`${API_URL}/api/dashboard`);
       const data = await res.json();
       setStats(data);
     } catch (err) {

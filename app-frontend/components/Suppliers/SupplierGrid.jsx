@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, Switch, Space, App } from 'antd';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL; // ✅ use env variable
+
 export default function SupplierGrid() {
   const { message } = App.useApp(); 
   const [suppliers, setSuppliers] = useState([]);
@@ -14,7 +16,7 @@ export default function SupplierGrid() {
   const fetchSuppliers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/suppliers'); // ✅ relative path
+      const res = await fetch(`${API_URL}/api/suppliers`); // ✅ absolute API path
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
       const data = await res.json();
       setSuppliers(data);
@@ -39,7 +41,7 @@ export default function SupplierGrid() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this supplier?')) return;
     try {
-      const res = await fetch(`/api/suppliers/${id}`, { method: 'DELETE' }); // ✅ relative path
+      const res = await fetch(`${API_URL}/api/suppliers/${id}`, { method: 'DELETE' }); // ✅ absolute
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
       message.success('Supplier deleted');
       fetchSuppliers();
@@ -52,14 +54,14 @@ export default function SupplierGrid() {
     const values = await form.validateFields();
     try {
       if (editingSupplier) {
-        await fetch(`/api/suppliers/${editingSupplier._id}`, { // ✅ relative path
+        await fetch(`${API_URL}/api/suppliers/${editingSupplier._id}`, { // ✅ absolute
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
         message.success('Supplier updated');
       } else {
-        await fetch('/api/suppliers', { // ✅ relative path
+        await fetch(`${API_URL}/api/suppliers`, { // ✅ absolute
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),

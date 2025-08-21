@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { Button, Space, Input, App } from "antd";
-import { ReloadOutlined, SearchOutlined, DownloadOutlined } from "@ant-design/icons";
+import {
+  ReloadOutlined,
+  SearchOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
+
+// ✅ Import custom cell renderers
+import { PriceCell, StockBadge, ImageThumb } from "./cellRenders";
 
 // ✅ AG Grid v34+ community modules
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
@@ -23,6 +30,7 @@ export default function ProductGrid() {
 
   const columnDefs = useMemo(
     () => [
+      { headerName: "Image", field: "images", cellRenderer: ImageThumb, width: 80 },
       { headerName: "Name", field: "name", sortable: true, filter: true, flex: 2 },
       { headerName: "Category", field: "category", sortable: true, filter: true, flex: 1 },
       {
@@ -30,9 +38,14 @@ export default function ProductGrid() {
         field: "price",
         sortable: true,
         flex: 1,
-        valueFormatter: (p) => `$${p.value}`,
+        cellRenderer: PriceCell,
       },
-      { headerName: "Stock", field: "stock", sortable: true, flex: 1 },
+      {
+        headerName: "Stock",
+        field: "stock",
+        flex: 1,
+        cellRenderer: StockBadge,
+      },
       { headerName: "Supplier", field: "supplier", flex: 2 },
     ],
     []
@@ -42,7 +55,6 @@ export default function ProductGrid() {
     async (searchTerm = search) => {
       setLoading(true);
       try {
-        // ✅ Use relative API path (rewrites in next.config.mjs will forward it)
         const res = await fetch(
           `/api/products?limit=100&includeSupplier=false&search=${encodeURIComponent(
             searchTerm
@@ -101,7 +113,7 @@ export default function ProductGrid() {
           pagination
           paginationPageSize={20}
           animateRows
-          theme="legacy" // ✅ Fix: tell AG Grid to use old CSS-based themes
+          theme="legacy"
         />
       </div>
     </div>

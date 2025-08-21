@@ -22,6 +22,8 @@ import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL; // ✅ Base URL from .env
+
 export default function InventoryPage() {
   const [transactions, setTransactions] = useState([]);
   const [inventoryStats, setInventoryStats] = useState({});
@@ -37,7 +39,7 @@ export default function InventoryPage() {
     type: null,
   });
 
-  // ✅ Safe JSON parser with status check
+  // ✅ Safe JSON parser
   const safeJson = async (res, endpointName) => {
     if (!res.ok) {
       console.error(`❌ Error fetching ${endpointName}:`, res.status, res.statusText);
@@ -60,8 +62,8 @@ export default function InventoryPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`/api/products`);
-      const data = await safeJson(res, `/api/products`);
+      const res = await fetch(`${API_URL}/products`); // ✅ updated
+      const data = await safeJson(res, `/products`);
       setProductList(Array.isArray(data) ? data : data.items || []);
     } catch (err) {
       console.error("Error fetching products", err);
@@ -81,20 +83,20 @@ export default function InventoryPage() {
 
       const [statsRes, trendsRes, categoriesRes, transactionsRes] =
         await Promise.all([
-          fetch(`/api/analytics/inventory`),
-          fetch(`/api/analytics/stock-movements?${params.toString()}`),
-          fetch(`/api/analytics/categories`),
-          fetch(`/api/transactions?${params.toString()}`),
+          fetch(`${API_URL}/analytics/inventory`), // ✅
+          fetch(`${API_URL}/analytics/stock-movements?${params.toString()}`), // ✅
+          fetch(`${API_URL}/analytics/categories`), // ✅
+          fetch(`${API_URL}/transactions?${params.toString()}`), // ✅
         ]);
 
-      const stats = await safeJson(statsRes, "/api/analytics/inventory");
-      const trends = await safeJson(trendsRes, "/api/analytics/stock-movements");
-      const categories = await safeJson(categoriesRes, "/api/analytics/categories");
-      const transactionsData = await safeJson(transactionsRes, "/api/transactions");
+      const stats = await safeJson(statsRes, "/analytics/inventory");
+      const trends = await safeJson(trendsRes, "/analytics/stock-movements");
+      const categories = await safeJson(categoriesRes, "/analytics/categories");
+      const transactionsData = await safeJson(transactionsRes, "/transactions");
 
       setInventoryStats(stats);
 
-      // ✅ Normalize trends for chart
+      // ✅ Normalize trends
       if (trends?.dailyMovements) {
         setStockTrends(
           trends.dailyMovements.map((t) => ({
@@ -107,7 +109,7 @@ export default function InventoryPage() {
         setStockTrends([]);
       }
 
-      // ✅ Normalize categories for pie + table
+      // ✅ Normalize categories
       if (Array.isArray(categories)) {
         setCategoriesData(
           categories.map((c) => ({
@@ -133,7 +135,7 @@ export default function InventoryPage() {
 
   const handleStockAdjust = async (values) => {
     try {
-      const res = await fetch(`/api/transactions`, {
+      const res = await fetch(`${API_URL}/transactions`, { // ✅ updated
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -155,7 +157,6 @@ export default function InventoryPage() {
       message.error(err.message);
     }
   };
-
   const columns = [
     {
       title: "Date",
