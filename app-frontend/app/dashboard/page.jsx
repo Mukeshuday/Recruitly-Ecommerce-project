@@ -16,11 +16,12 @@ export default function DashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // ✅ Use relative API path (goes through Next.js rewrite)
       const res = await fetch("/api/dashboard");
       const data = await res.json();
       setStats(data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -33,12 +34,12 @@ export default function DashboardPage() {
   if (!stats) return <p>Loading...</p>;
 
   // Safe destructuring with defaults
-    const totalProducts = stats?.totalProducts ?? 0;
-    const lowStockItems = Array.isArray(stats?.lowStockItems) ? stats.lowStockItems : [];
-    const totalValue = stats?.totalValue ?? 0;
-    const stockMovements = Array.isArray(stats?.stockMovements) ? stats.stockMovements : [];
-    const mostSellingCategories = Array.isArray(stats?.mostSellingCategories) ? stats.mostSellingCategories : [];
-    const recentTransactions = Array.isArray(stats?.recentTransactions) ? stats.recentTransactions : [];
+  const totalProducts = stats?.totalProducts ?? 0;
+  const lowStockItems = Array.isArray(stats?.lowStockItems) ? stats.lowStockItems : [];
+  const totalValue = stats?.totalValue ?? 0;
+  const stockMovements = Array.isArray(stats?.stockMovements) ? stats.stockMovements : [];
+  const mostSellingCategories = Array.isArray(stats?.mostSellingCategories) ? stats.mostSellingCategories : [];
+  const recentTransactions = Array.isArray(stats?.recentTransactions) ? stats.recentTransactions : [];
 
   // Transform stockMovements for chart
   const chartData = stockMovements.map((d) => ({
@@ -169,9 +170,7 @@ export default function DashboardPage() {
                 {
                   title: "Product",
                   render: (_, r) =>
-                    `${r.productId?.name || "Unknown"} (${
-                      r.productId?.sku || ""
-                    })`,
+                    `${r.productId?.name || "Unknown"} (${r.productId?.sku || ""})`,
                 },
                 { title: "Type", dataIndex: "type" },
                 { title: "Quantity", dataIndex: "quantity" },

@@ -1,10 +1,12 @@
 // app/api/analytics/inventory/route.js
+import express from "express"
 import { dbConnect } from "@/lib/db";
 import Product from "@/lib/models/Product";
-import { NextResponse } from "next/server";
 
-export async function GET() {
-  try {
+
+const router = express.Router();
+router.get("/api/analytics/inventory",async(req,res) => {
+try {
     // Connect to database
     await dbConnect();
 
@@ -46,7 +48,7 @@ export async function GET() {
       ]);
 
     // Prepare response
-    return NextResponse.json(
+    res.json(
       {
         totalProducts,
         activeProducts,
@@ -59,9 +61,9 @@ export async function GET() {
     );
   } catch (error) {
     console.error("❌ Error fetching inventory analytics:", error);
-    return NextResponse.json(
+    res.json(
       { error: "Failed to fetch inventory analytics", details: error.message },
       { status: 500 }
     );
   }
-}
+});

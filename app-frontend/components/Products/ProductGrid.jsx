@@ -21,27 +21,44 @@ export default function ProductGrid() {
 
   const gridRef = useRef(null); // ✅ useRef for grid API access
 
-  const columnDefs = useMemo(() => [
-    { headerName: "Name", field: "name", sortable: true, filter: true, flex: 2 },
-    { headerName: "Category", field: "category", sortable: true, filter: true, flex: 1 },
-    { headerName: "Price", field: "price", sortable: true, flex: 1, valueFormatter: p => `$${p.value}` },
-    { headerName: "Stock", field: "stock", sortable: true, flex: 1 },
-    { headerName: "Supplier", field: "supplier", flex: 2 },
-  ], []);
+  const columnDefs = useMemo(
+    () => [
+      { headerName: "Name", field: "name", sortable: true, filter: true, flex: 2 },
+      { headerName: "Category", field: "category", sortable: true, filter: true, flex: 1 },
+      {
+        headerName: "Price",
+        field: "price",
+        sortable: true,
+        flex: 1,
+        valueFormatter: (p) => `$${p.value}`,
+      },
+      { headerName: "Stock", field: "stock", sortable: true, flex: 1 },
+      { headerName: "Supplier", field: "supplier", flex: 2 },
+    ],
+    []
+  );
 
-  const fetchProducts = useCallback(async (searchTerm = search) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?limit=100&includeSupplier=false&search=${encodeURIComponent(searchTerm)}`);
-      if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
-      const data = await res.json();
-      setRowData(data.items || []);
-    } catch (err) {
-      message.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, message]);
+  const fetchProducts = useCallback(
+    async (searchTerm = search) => {
+      setLoading(true);
+      try {
+        // ✅ Use relative API path (rewrites in next.config.mjs will forward it)
+        const res = await fetch(
+          `/api/products?limit=100&includeSupplier=false&search=${encodeURIComponent(
+            searchTerm
+          )}`
+        );
+        if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
+        const data = await res.json();
+        setRowData(data.items || []);
+      } catch (err) {
+        message.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [search, message]
+  );
 
   useEffect(() => {
     fetchProducts();
@@ -70,10 +87,7 @@ export default function ProductGrid() {
         >
           Refresh
         </Button>
-        <Button
-          icon={<DownloadOutlined />}
-          onClick={onExport}
-        >
+        <Button icon={<DownloadOutlined />} onClick={onExport}>
           Export CSV
         </Button>
       </Space>

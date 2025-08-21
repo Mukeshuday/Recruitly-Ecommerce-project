@@ -1,30 +1,38 @@
-import { NextResponse } from 'next/server';
-import { dbConnect } from '@/lib/db';
-import Supplier from '@/lib/models/Supplier';
+import express from "express";
+import { dbConnect } from '../../lib/db.js';
+import Supplier from '../../lib/models/Supplier.js';
 
-export async function GET() {
+
+const router = express.Router();
+
+ router.get("/api/suppliers",async(req,res) =>
+{
   await dbConnect();
   try {
     const suppliers = await Supplier.find().sort({ createdAt: -1 }).lean();
-    return NextResponse.json(suppliers);
+    return res.json(suppliers);
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return res.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(req) {
+router.post("/api/suppliers",async(req,res) =>
+{
   await dbConnect();
   try {
     const body = await req.json();
 
     // Validate required fields
     if (!body.name || !body.email) {
-      return NextResponse.json({ error: 'Name and Email are required' }, { status: 400 });
+      return res.json({ error: 'Name and Email are required' }, { status: 400 });
     }
 
     const newSupplier = await Supplier.create(body);
-    return NextResponse.json(newSupplier, { status: 201 });
+    return res.json(newSupplier, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    return res.json({ error: err.message }, { status: 400 });
   }
-}
+});
+
+
+export default router;

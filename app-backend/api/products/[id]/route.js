@@ -1,29 +1,33 @@
-import { NextResponse } from 'next/server';
-import { dbConnect } from '@/lib/db';
-import Product from '@/lib/models/Product';
+import express from "express"
+import { dbConnect } from '../../../lib/db.js';
+import Product from '../../../lib/models/Product.js';
 
-export async function GET(_, { params }) {
+
+const router = express.Router();
+router.get("/api/products/[id]",async(req,res)=>  {
   await dbConnect();
   const product = await Product.findById(params.id).populate('supplierId','name email phone').lean();
-  if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(product);
-}
+  if (!product) return res.json({ error: 'Not found' }, { status: 404 });
+  res.json(product);
+} );
 
-export async function PUT(req, { params }) {
+router.put("/api/products/[id]",async(req,res)=> {
   await dbConnect();
-  const patch = await req.json();
+  const patch = await req.body;
   try {
     const updated = await Product.findByIdAndUpdate(params.id, patch, { new: true, runValidators: true });
-    if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json(updated);
+    if (!updated) return res.json({ error: 'Not found' }, { status: 404 });
+    return res.json(updated);
   } catch (e) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+    return res.json({ error: e.message }, { status: 400 });
   }
-}
+});
 
-export async function DELETE(_, { params }) {
+router.delete("/api/products/[id]",async(req,res)=> {
   await dbConnect();
   const deleted = await Product.findByIdAndDelete(params.id);
-  if (!deleted) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json({ ok: true });
-}
+  if (!deleted) return res.json({ error: 'Not found' }, { status: 404 });
+  return res.json({ ok: true });
+});
+
+export default router;

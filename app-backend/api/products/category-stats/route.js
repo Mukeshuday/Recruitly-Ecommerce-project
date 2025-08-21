@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db";
-import Product from "@/lib/models/Product";
+import express from "express"
+import { dbConnect } from "../../../lib/db.js";
+import Product from "../../../lib/models/Product.js";
 
-export async function GET() {
+router.get("/api/products/category-stats",async(req,res)=>{
   try {
     await dbConnect();
 
@@ -29,7 +29,7 @@ export async function GET() {
       }
     ]);
 
-    return NextResponse.json(
+    return res.json(
       stats.map((s) => ({
         category: s._id || "Uncategorized",
         totalProducts: s.totalProducts,
@@ -42,6 +42,6 @@ export async function GET() {
     );
   } catch (err) {
     console.error("❌ Error in /api/products/category-stats:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return res.json({ error: err.message }, { status: 500 });
   }
-}
+});

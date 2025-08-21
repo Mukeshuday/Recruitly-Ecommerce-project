@@ -1,8 +1,12 @@
-import '../globals.css';
+import 'antd/dist/reset.css';   // ✅ Ant Design base styles
+import '../globals.css';        // ✅ Your global styles
 import { ConfigProvider, App as AntApp } from 'antd';
 import TopNav from '@/components/common/TopNav';
 
-export const metadata = { title: 'E‑Commerce Inventory', description: 'Product Inventory Management' };
+export const metadata = {
+  title: 'E-Commerce Inventory',
+  description: 'Product Inventory Management'
+};
 
 export default function RootLayout({ children }) {
   return (

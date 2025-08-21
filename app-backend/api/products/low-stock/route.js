@@ -1,13 +1,16 @@
-import { NextResponse } from 'next/server';
-import { dbConnect } from '@/lib/db';
-import Product from '@/lib/models/Product';
+import express from "express";
+import { dbConnect } from '../../../lib/db.js';
+import Product from '../../../lib/models/Product.js';
 
-export async function GET() {
+const router = express.Router();
+router.get("/api/products/low-stock",async(req,res)=> {
   await dbConnect();
   const items = await Product.find({
     $expr: { $lt: ["$currentStock", "$minimumStock"] },
     isActive: true
   }).sort({ currentStock: 1 }).lean();
 
-  return NextResponse.json({ total: items.length, items });
-}
+  return res.json({ total: items.length, items });
+});
+
+export default router;

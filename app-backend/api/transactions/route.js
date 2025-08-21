@@ -1,24 +1,28 @@
 // app/api/transactions/route.js
-import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db";
-import Product from "@/lib/models/Product";
-import StockTransaction from "@/lib/models/StockTransaction";
+import express from "express";
+import { dbConnect } from "../../lib/db.js";
+import Product from "../../lib/models/Product.js";
+import StockTransaction from "../../lib/models/StockTransaction.js";
+
+
+const router = express.Router();
 
 // ✅ CREATE a stock transaction
-export async function POST(req) {
+router.post("/api/transactions",async(req,res) => 
+{
   try {
     await dbConnect();
     const body = await req.json();
     const { productId, type, quantity, reason, referenceId, performedBy, notes } = body;
 
     if (!productId || !type || !quantity || !reason) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return res.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Fetch product
     const product = await Product.findById(productId);
     if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      return res.json({ error: "Product not found" }, { status: 404 });
     }
 
     let stockChange = 0;
@@ -26,16 +30,16 @@ export async function POST(req) {
       stockChange = quantity;
     } else if (type === "OUT") {
       if (product.currentStock < quantity) {
-        return NextResponse.json({ error: "Insufficient stock" }, { status: 400 });
+        return res.json({ error: "Insufficient stock" }, { status: 400 });
       }
       stockChange = -quantity;
     } else if (type === "ADJUSTMENT") {
       stockChange = quantity;
       if (product.currentStock + stockChange < 0) {
-        return NextResponse.json({ error: "Adjustment would result in negative stock" }, { status: 400 });
+        return res.json({ error: "Adjustment would result in negative stock" }, { status: 400 });
       }
     } else {
-      return NextResponse.json({ error: "Invalid transaction type" }, { status: 400 });
+      return res.json({ error: "Invalid transaction type" }, { status: 400 });
     }
 
     // ✅ Update product stock without triggering full validation
@@ -54,16 +58,17 @@ export async function POST(req) {
       notes,
     });
 
-    return NextResponse.json({ success: true, transaction }, { status: 201 });
+    return res.json({ success: true, transaction }, { status: 201 });
   } catch (error) {
     console.error("Transaction POST error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return res.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+}); 
 
 
 // ✅ GET stock transactions (with filters)
-export async function GET(req) {
+router.get("/api/transactions",async(req,res) => 
+{
   try {
     await dbConnect();
 
@@ -88,9 +93,11 @@ export async function GET(req) {
       .limit(limit)
       .populate("productId", "name currentStock unitPrice");
 
-    return NextResponse.json(transactions,{ status:200 });
+    return res.json(transactions,{ status:200 });
   } catch (error) {
     console.error("Transaction GET error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return res.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+}); 
+
+export default router;

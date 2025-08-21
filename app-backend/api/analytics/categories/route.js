@@ -1,8 +1,12 @@
-import { dbConnect } from "@/lib/db";
-import Product from "@/lib/models/Product";
+import express from "express";
+import { dbConnect } from "../../../lib/db.js";
+import Product from "../../../lib/models/Product.js";
 
-export async function GET() {
-  try {
+const router = express.Router();
+
+
+router.get("/api/analytics/categories",async(req,res) => {
+try {
     await dbConnect();
 
     const products = await Product.find({});
@@ -30,8 +34,8 @@ export async function GET() {
       }
     });
 
-    return Response.json(Object.values(categorySummary));
+    res.json(Object.values(categorySummary));
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    res.json({ error: error.message }, { status: 500 });
   }
-}
+});

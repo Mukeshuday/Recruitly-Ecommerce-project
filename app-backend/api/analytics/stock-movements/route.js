@@ -1,11 +1,11 @@
 // app/api/analytics/stock-movements/route.js
-import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db";
-import StockTransaction from "@/lib/models/StockTransaction";
-import Product from "@/lib/models/Product";
+import express from "express"
+import { dbConnect } from "../../../lib/db.js";
+import StockTransaction from "../../../lib/models/StockTransaction.js";
+import Product from "../../../lib/models/Product.js";
 
-export async function GET(req) {
-  try {
+router.get("/api/analytics/stock-movements",async(req,res) => {
+try {
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
@@ -69,7 +69,7 @@ export async function GET(req) {
       }
     }
 
-    return NextResponse.json(
+    res.json(
       {
         dailyMovements, // grouped totals
         stockTimeline, // cumulative stock trend
@@ -78,6 +78,6 @@ export async function GET(req) {
     );
   } catch (error) {
     console.error("Error fetching stock movement analytics:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    res.json({ error: error.message }, { status: 500 });
   }
-}
+});

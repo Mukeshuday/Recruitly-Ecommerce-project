@@ -1,8 +1,11 @@
-import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db";
-import StockTransaction from "@/lib/models/StockTransaction";
+import express from "express"
+import { dbConnect } from "../../../lib/db.js";
+import StockTransaction from "../../../lib/models/StockTransaction.js";
 
-export async function GET(req) {
+const router = express.Router();
+
+router.get("/api/transactions/trends",async(req,res) =>
+{
   try {
     await dbConnect();
 
@@ -36,7 +39,7 @@ export async function GET(req) {
       { $sort: { "_id.date": 1 } },
     ]);
 
-    return NextResponse.json({
+    return res.json({
       dailyMovements: results.map((r) => ({
         date: r._id.date,
         type: r._id.type,
@@ -45,6 +48,8 @@ export async function GET(req) {
     });
   } catch (err) {
     console.error("❌ Error in /api/transactions/trends:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return res.json({ error: err.message }, { status: 500 });
   }
-}
+});
+
+export default router;

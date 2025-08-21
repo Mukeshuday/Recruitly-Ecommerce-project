@@ -1,26 +1,28 @@
-import { NextResponse } from 'next/server';
-import { dbConnect } from '@/lib/db';
-import Product from '@/lib/models/Product';
-import StockTransaction from '@/lib/models/StockTransaction';
+import express from "express"
+import { dbConnect } from '../../../../lib/db.js';
+import Product from '../../../../lib/models/Product.js';
+import StockTransaction from '../../../../lib/models/StockTransaction.js';
 
-export async function POST(req, { params }) {
+const router = express.Router();
+
+router.post("/api/products/[id]/stock",async(req,res)=>{
   await dbConnect();
   const { type, quantity, reason, referenceId, performedBy, notes } = await req.json();
 
   // Basic validation
   if (!type || !['IN', 'OUT', 'ADJUSTMENT'].includes(type)) {
-    return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    return res.json({ error: 'Invalid type' }, { status: 400 });
   }
   if (typeof quantity !== 'number' || quantity === 0) {
-    return NextResponse.json({ error: 'Quantity must be a non-zero number' }, { status: 400 });
+    return res.json({ error: 'Quantity must be a non-zero number' }, { status: 400 });
   }
   if (!reason) {
-    return NextResponse.json({ error: 'Reason is required' }, { status: 400 });
+    return res.json({ error: 'Reason is required' }, { status: 400 });
   }
 
   const product = await Product.findById(params.id);
   if (!product) {
-    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    return res.json({ error: 'Product not found' }, { status: 404 });
   }
 
   let delta;
@@ -37,7 +39,7 @@ export async function POST(req, { params }) {
 
   const newStock = product.currentStock + delta;
   if (newStock < 0) {
-    return NextResponse.json({ error: 'Stock cannot go negative' }, { status: 400 });
+    return res.json({ error: 'Stock cannot go negative' }, { status: 400 });
   }
 
   product.currentStock = newStock;
@@ -53,5 +55,7 @@ export async function POST(req, { params }) {
     notes,
   });
 
-  return NextResponse.json({ ok: true, currentStock: product.currentStock });
-}
+  return res.json({ ok: true, currentStock: product.currentStock });
+});
+
+export default router;

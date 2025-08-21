@@ -1,16 +1,15 @@
-import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/db";
-import StockTransaction from "@/lib/models/StockTransaction";
+import express from "express";
+import { dbConnect } from "../../lib/db.js";
+import StockTransaction from "../../lib/models/StockTransaction.js";
 
-export async function GET(request) {
+const router = express.Router();
+
+// Main analytics route - stock trends
+router.get("/api/analytics", async (req, res) => {
   await dbConnect();
 
   try {
-    const { searchParams } = new URL(request.url);
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
-    const product = searchParams.get("product");
-    const type = searchParams.get("type");
+    const { from, to, product, type } = req.query;
 
     const query = {};
     if (from && to) query.createdAt = { $gte: new Date(from), $lte: new Date(to) };
@@ -28,8 +27,10 @@ export async function GET(request) {
       type: t.type,
     }));
 
-    return NextResponse.json(trends);
+    res.json(trends);
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    res.status(500).json({ error: err.message });
   }
-}
+});
+
+export default router;

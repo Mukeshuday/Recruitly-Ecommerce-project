@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
-import { dbConnect } from '@/lib/db';
-import StockTransaction from '@/lib/models/StockTransaction';
+import { dbConnect } from '../../lib/db.js';
+import StockTransaction from '../../lib/models/StockTransaction.js';
+import express from "express";
 
-export async function GET(req) {
+const router = express.Router();
+router.get("/api/stock-transactions",async(req,res) => {
   await dbConnect();
   const { searchParams } = new URL(req.url);
   const page  = parseInt(searchParams.get('page')  || '1', 10);
@@ -28,5 +29,7 @@ export async function GET(req) {
     StockTransaction.countDocuments(filter)
   ]);
 
-  return NextResponse.json({ page, limit, total, items });
-}
+  return res.json({ page, limit, total, items });
+}); 
+
+export default router;

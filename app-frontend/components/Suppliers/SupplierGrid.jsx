@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, Switch, Space, App } from 'antd';
 
 export default function SupplierGrid() {
-  const { message } = App.useApp(); // ✅ use hook instead of static message
+  const { message } = App.useApp(); 
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -14,7 +14,7 @@ export default function SupplierGrid() {
   const fetchSuppliers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/suppliers');
+      const res = await fetch('/api/suppliers'); // ✅ relative path
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
       const data = await res.json();
       setSuppliers(data);
@@ -39,7 +39,7 @@ export default function SupplierGrid() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this supplier?')) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/suppliers/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/suppliers/${id}`, { method: 'DELETE' }); // ✅ relative path
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
       message.success('Supplier deleted');
       fetchSuppliers();
@@ -52,14 +52,14 @@ export default function SupplierGrid() {
     const values = await form.validateFields();
     try {
       if (editingSupplier) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/suppliers/${editingSupplier._id}`, {
+        await fetch(`/api/suppliers/${editingSupplier._id}`, { // ✅ relative path
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
         message.success('Supplier updated');
       } else {
-        await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/suppliers', {
+        await fetch('/api/suppliers', { // ✅ relative path
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),

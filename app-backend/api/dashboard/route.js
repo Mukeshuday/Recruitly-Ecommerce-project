@@ -1,8 +1,12 @@
-import Product from "@/lib/models/Product";
-import StockTransaction from "@/lib/models/StockTransaction";
-import { dbConnect } from "@/lib/db";
+import express from "express";
+import Product from "../../lib/models/Product.js";
+import StockTransaction from  "../../lib/models/StockTransaction.js";
+import { dbConnect } from "../../lib/db.js";
 
-export async function GET() {
+
+const router = express.Router();
+
+router.get("/api/dashboard",async(req,res) => { 
   try {
     await dbConnect();
 
@@ -70,7 +74,7 @@ export async function GET() {
       .limit(10)
       .populate("productId", "name sku");
 
-    return Response.json({
+    res.json({
       totalProducts,
       totalValue,
       lowStockItems,
@@ -80,6 +84,8 @@ export async function GET() {
     });
   } catch (err) {
     console.error(err);
-    return Response.json({ error: err.message }, { status: 500 });
+    res.json({ error: err.message }, { status: 500 });
   }
-}
+});
+
+export default router;

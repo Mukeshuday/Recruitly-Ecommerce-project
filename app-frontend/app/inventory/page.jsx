@@ -60,8 +60,8 @@ export default function InventoryPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
-      const data = await safeJson(res, `${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+      const res = await fetch(`/api/products`);
+      const data = await safeJson(res, `/api/products`);
       setProductList(Array.isArray(data) ? data : data.items || []);
     } catch (err) {
       console.error("Error fetching products", err);
@@ -81,10 +81,10 @@ export default function InventoryPage() {
 
       const [statsRes, trendsRes, categoriesRes, transactionsRes] =
         await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analytics/inventory`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analytics/stock-movements?${params.toString()}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analytics/categories`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/transactions?${params.toString()}`),
+          fetch(`/api/analytics/inventory`),
+          fetch(`/api/analytics/stock-movements?${params.toString()}`),
+          fetch(`/api/analytics/categories`),
+          fetch(`/api/transactions?${params.toString()}`),
         ]);
 
       const stats = await safeJson(statsRes, "/api/analytics/inventory");
@@ -133,7 +133,7 @@ export default function InventoryPage() {
 
   const handleStockAdjust = async (values) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/transactions`, {
+      const res = await fetch(`/api/transactions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
