@@ -6,7 +6,7 @@ import { dbConnect } from "../../lib/db.js";
 
 const router = express.Router();
 
-router.get("/api/dashboard",async(req,res) => { 
+router.get("/",async(req,res) => { 
   try {
     await dbConnect();
 
@@ -84,7 +84,7 @@ router.get("/api/dashboard",async(req,res) => {
     });
   } catch (err) {
     console.error(err);
-    res.json({ error: err.message }, { status: 500 });
+    res.status(500).json({ error: err.message });
   }
 });
 

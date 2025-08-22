@@ -5,7 +5,7 @@ import StockTransaction from '../../../../lib/models/StockTransaction.js';
 
 const router = express.Router();
 
-router.post("/api/products/[id]/stock",async(req,res)=>{
+router.post("/",async(req,res)=>{
   await dbConnect();
   const { type, quantity, reason, referenceId, performedBy, notes } = await req.json();
 

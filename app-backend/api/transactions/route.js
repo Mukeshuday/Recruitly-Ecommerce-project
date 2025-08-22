@@ -8,7 +8,7 @@ import StockTransaction from "../../lib/models/StockTransaction.js";
 const router = express.Router();
 
 // ✅ CREATE a stock transaction
-router.post("/api/transactions",async(req,res) => 
+router.post("/",async(req,res) => 
 {
   try {
     await dbConnect();
@@ -67,7 +67,7 @@ router.post("/api/transactions",async(req,res) =>
 
 
 // ✅ GET stock transactions (with filters)
-router.get("/api/transactions",async(req,res) => 
+router.get("/",async(req,res) => 
 {
   try {
     await dbConnect();

@@ -3,7 +3,7 @@ import StockTransaction from '../../lib/models/StockTransaction.js';
 import express from "express";
 
 const router = express.Router();
-router.get("/api/stock-transactions",async(req,res) => {
+router.get("/",async(req,res) => {
   await dbConnect();
   const { searchParams } = new URL(req.url);
   const page  = parseInt(searchParams.get('page')  || '1', 10);

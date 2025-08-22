@@ -1,10 +1,11 @@
 // app/api/analytics/stock-movements/route.js
-import express from "express"
+import express from "express";
 import { dbConnect } from "../../../lib/db.js";
 import StockTransaction from "../../../lib/models/StockTransaction.js";
 import Product from "../../../lib/models/Product.js";
 
-router.get("/api/analytics/stock-movements",async(req,res) => {
+const router = express.Router();
+router.get("/",async(req,res) => {
 try {
     await dbConnect();
 
@@ -81,3 +82,5 @@ try {
     res.json({ error: error.message }, { status: 500 });
   }
 });
+
+export default router;

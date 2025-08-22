@@ -62,7 +62,7 @@ export default function InventoryPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${API_URL}/products`); // ✅ updated
+      const res = await fetch(`${API_URL}/api/products`); // ✅ updated
       const data = await safeJson(res, `/products`);
       setProductList(Array.isArray(data) ? data : data.items || []);
     } catch (err) {
@@ -83,15 +83,15 @@ export default function InventoryPage() {
 
       const [statsRes, trendsRes, categoriesRes, transactionsRes] =
         await Promise.all([
-          fetch(`${API_URL}/analytics/inventory`), // ✅
-          fetch(`${API_URL}/analytics/stock-movements?${params.toString()}`), // ✅
-          fetch(`${API_URL}/analytics/categories`), // ✅
-          fetch(`${API_URL}/transactions?${params.toString()}`), // ✅
+          fetch(`${API_URL}/api/analytics/inventory`), // ✅
+          fetch(`${API_URL}/api/analytics/stock-movements?${params.toString()}`), // ✅
+          fetch(`${API_URL}/api/analytics/categories`), // ✅
+          fetch(`${API_URL}/api/transactions?${params.toString()}`), // ✅
         ]);
 
-      const stats = await safeJson(statsRes, "/analytics/inventory");
-      const trends = await safeJson(trendsRes, "/analytics/stock-movements");
-      const categories = await safeJson(categoriesRes, "/analytics/categories");
+      const stats = await safeJson(statsRes, "/inventory");
+      const trends = await safeJson(trendsRes, "/stock-movements");
+      const categories = await safeJson(categoriesRes, "/categories");
       const transactionsData = await safeJson(transactionsRes, "/transactions");
 
       setInventoryStats(stats);
@@ -135,7 +135,7 @@ export default function InventoryPage() {
 
   const handleStockAdjust = async (values) => {
     try {
-      const res = await fetch(`${API_URL}/transactions`, { // ✅ updated
+      const res = await fetch(`${API_URL}/api/transactions`, { // ✅ updated
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -216,9 +216,9 @@ export default function InventoryPage() {
     colorField: "type",
     radius: 0.9,
     label: {
-      type: "inner",
+      position: "inside",
       offset: "-30%",
-      content: "{value}",
+      content: ({value}) => value,
       style: { fontSize: 14, textAlign: "center" },
     },
   };
@@ -237,8 +237,8 @@ export default function InventoryPage() {
           </Card>
         </Col>
         <Col span={8}>
-          <Card title="Low Stock Items" variant="borderless">
-            {inventoryStats.lowStockCount || 0}
+          <Card title="Potential Revenue" variant="borderless">
+            ${inventoryStats.potentialRevenue?.toLocaleString() || 0}
           </Card>
         </Col>
         <Col span={8}>
@@ -247,6 +247,27 @@ export default function InventoryPage() {
           </Card>
         </Col>
       </Row>
+
+      <br />
+
+      <Row gutter={16}>
+        <Col span={8}>
+          <Card title="Active Products" variant="borderless">
+            {inventoryStats.activeProducts || 0}
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card title="Low Stock Items" variant="borderless">
+            {inventoryStats.lowStockCount || 0}
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card title="Overstocked Items" variant="borderless">
+            {inventoryStats.overStockCount || 0}
+          </Card>
+        </Col>
+      </Row>
+
 
       <br />
 

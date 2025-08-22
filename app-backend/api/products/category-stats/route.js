@@ -2,7 +2,7 @@ import express from "express"
 import { dbConnect } from "../../../lib/db.js";
 import Product from "../../../lib/models/Product.js";
 
-router.get("/api/products/category-stats",async(req,res)=>{
+router.get("/",async(req,res)=>{
   try {
     await dbConnect();
 

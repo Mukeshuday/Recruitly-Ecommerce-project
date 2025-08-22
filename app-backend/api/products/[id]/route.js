@@ -4,14 +4,14 @@ import Product from '../../../lib/models/Product.js';
 
 
 const router = express.Router();
-router.get("/api/products/[id]",async(req,res)=>  {
+router.get("/",async(req,res)=>  {
   await dbConnect();
   const product = await Product.findById(params.id).populate('supplierId','name email phone').lean();
   if (!product) return res.json({ error: 'Not found' }, { status: 404 });
   res.json(product);
 } );
 
-router.put("/api/products/[id]",async(req,res)=> {
+router.put("/",async(req,res)=> {
   await dbConnect();
   const patch = await req.body;
   try {
@@ -23,7 +23,7 @@ router.put("/api/products/[id]",async(req,res)=> {
   }
 });
 
-router.delete("/api/products/[id]",async(req,res)=> {
+router.delete("/",async(req,res)=> {
   await dbConnect();
   const deleted = await Product.findByIdAndDelete(params.id);
   if (!deleted) return res.json({ error: 'Not found' }, { status: 404 });

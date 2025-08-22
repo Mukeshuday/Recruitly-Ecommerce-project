@@ -1,6 +1,6 @@
 import express from "express";
-import { dbConnect } from '@/lib/db';
-import Supplier from '@/lib/models/Supplier';
+import { dbConnect } from '../../../lib/db.js';
+import Supplier from '../../../lib/models/Supplier.js';
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.use(async(req,res,next) =>{
   }
 });
 
-router.get("/api/suppliers/[id]", async(req,res)=>{
+router.get("/", async(req,res)=>{
   await dbConnect();
   try {
     const supplier = await Supplier.findById(params.id).lean();
@@ -24,7 +24,7 @@ router.get("/api/suppliers/[id]", async(req,res)=>{
   }
 });
 
-router.get("/api/suppliers/[id]",async(req,res) =>{
+router.get("/",async(req,res) =>{
 await dbConnect();
   try {
     const body = await req.json();
@@ -39,7 +39,7 @@ await dbConnect();
   }
 });
 
-router.delete("/app-backend/api/stock-transactions/[id]",async(req,res) => 
+router.delete("/",async(req,res) => 
 {
   await dbConnect();
   try {

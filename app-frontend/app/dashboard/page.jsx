@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Table, Typography, Statistic, List } from "antd";
+import { Card, Row, Col, Table, Typography, Statistic, List, Spin, message } from "antd";
 import {
   ShoppingOutlined,
   WarningOutlined,
@@ -18,12 +18,13 @@ export default function DashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // ✅ Use backend API from .env
       const res = await fetch(`${API_URL}/api/dashboard`);
+      if (!res.ok) throw new Error(`Failed: ${res.status}`);
       const data = await res.json();
       setStats(data);
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
+      message.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -33,37 +34,26 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  if (!stats) return <p>Loading...</p>;
+  if (loading) return <Spin tip="Loading dashboard..." style={{ marginTop: 50 }} />;
+  if (!stats) return <p>No data available</p>;
 
   // Safe destructuring with defaults
   const totalProducts = stats?.totalProducts ?? 0;
   const lowStockItems = Array.isArray(stats?.lowStockItems) ? stats.lowStockItems : [];
   const totalValue = stats?.totalValue ?? 0;
-  const stockMovements = Array.isArray(stats?.stockMovements) ? stats.stockMovements : [];
+  const stockTrends = Array.isArray(stats?.stockTrends) ? stats.stockTrends : [];
   const mostSellingCategories = Array.isArray(stats?.mostSellingCategories) ? stats.mostSellingCategories : [];
   const recentTransactions = Array.isArray(stats?.recentTransactions) ? stats.recentTransactions : [];
 
-  // Transform stockMovements for chart
-  const chartData = stockMovements.map((d) => ({
-    date: new Date(d._id).toLocaleDateString(),
-    stockIn: d.stockIn || 0,
-    stockOut: d.stockOut || 0,
-  }));
-
-  const inSeries = chartData.map((d) => ({
-    date: d.date,
-    value: d.stockIn,
-    type: "Stock In",
-  }));
-
-  const outSeries = chartData.map((d) => ({
-    date: d.date,
-    value: d.stockOut,
-    type: "Stock Out",
+  // Transform stockTrends for chart
+  const chartData = stockTrends.map((d) => ({
+    date: d._id.date,
+    value: d.total,
+    type: d._id.type === "IN" ? "Stock In" : "Stock Out",
   }));
 
   const chartConfig = {
-    data: [...inSeries, ...outSeries],
+    data: chartData,
     xField: "date",
     yField: "value",
     seriesField: "type",
@@ -127,9 +117,7 @@ export default function DashboardPage() {
               dataSource={mostSellingCategories}
               renderItem={(item) => (
                 <List.Item>
-                  <Typography.Text>
-                    {item._id || "Uncategorized"}
-                  </Typography.Text>
+                  <Typography.Text>{item._id || "Uncategorized"}</Typography.Text>
                   <span>{item.totalSold || 0} sold</span>
                 </List.Item>
               )}

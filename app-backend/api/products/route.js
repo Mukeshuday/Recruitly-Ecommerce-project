@@ -6,7 +6,7 @@ import Supplier from "../../lib/models/Supplier.js";
 const router = express.Router();
 
 // 📌 GET /api/products
-router.get("/api/products", async (req, res) => {
+router.get("/", async (req, res) => {
   await dbConnect();
 
   try {
@@ -79,7 +79,7 @@ router.get("/api/products", async (req, res) => {
 });
 
 // 📌 POST /api/products
-router.post("/api/products", async (req, res) => {
+router.post("/", async (req, res) => {
   await dbConnect();
 
   try {

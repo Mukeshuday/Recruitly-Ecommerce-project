@@ -4,8 +4,7 @@ import Product from "../../../lib/models/Product.js";
 
 const router = express.Router();
 
-
-router.get("/api/analytics/categories",async(req,res) => {
+router.get("/",async(req,res) => {
 try {
     await dbConnect();
 
@@ -39,3 +38,5 @@ try {
     res.json({ error: error.message }, { status: 500 });
   }
 });
+
+export default router;

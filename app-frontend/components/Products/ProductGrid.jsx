@@ -28,6 +28,7 @@ export default function ProductGrid() {
 
   const gridRef = useRef(null); // ✅ useRef for grid API access
 
+  // ✅ Columns
   const columnDefs = useMemo(
     () => [
       { headerName: "Image", field: "images", cellRenderer: ImageThumb, width: 80 },
@@ -51,12 +52,16 @@ export default function ProductGrid() {
     []
   );
 
+  // ✅ API base from environment variable
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+  // ✅ Fetch products
   const fetchProducts = useCallback(
     async (searchTerm = search) => {
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/products?limit=100&includeSupplier=false&search=${encodeURIComponent(
+          `${API_URL}/api/products?limit=100&includeSupplier=false&search=${encodeURIComponent(
             searchTerm
           )}`
         );
@@ -69,13 +74,14 @@ export default function ProductGrid() {
         setLoading(false);
       }
     },
-    [search, message]
+    [search, message, API_URL]
   );
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
+  // ✅ CSV Export
   const onExport = () => {
     if (gridRef.current) {
       gridRef.current.api.exportDataAsCsv();

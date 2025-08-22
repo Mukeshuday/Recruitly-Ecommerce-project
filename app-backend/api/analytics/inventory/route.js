@@ -1,24 +1,21 @@
-// app/api/analytics/inventory/route.js
-import express from "express"
-import { dbConnect } from "@/lib/db";
-import Product from "@/lib/models/Product";
-
+import express from "express";
+import { dbConnect } from "../../../lib/db.js";
+import Product from "../../../lib/models/Product.js";
 
 const router = express.Router();
-router.get("/api/analytics/inventory",async(req,res) => {
-try {
-    // Connect to database
+
+router.get("/",async(req,res) =>
+ {
+  try {
     await dbConnect();
 
-    // Calculate stock value and revenue efficiently using aggregation
+    // Aggregations
     const [stockValueAgg, revenueAgg] = await Promise.all([
       Product.aggregate([
         {
           $group: {
             _id: null,
-            total: {
-              $sum: { $multiply: ["$currentStock", "$costPrice"] },
-            },
+            total: { $sum: { $multiply: ["$currentStock", "$costPrice"] } },
           },
         },
       ]),
@@ -26,29 +23,23 @@ try {
         {
           $group: {
             _id: null,
-            total: {
-              $sum: { $multiply: ["$currentStock", "$price"] },
-            },
+            total: { $sum: { $multiply: ["$currentStock", "$price"] } },
           },
         },
       ]),
     ]);
 
-    // Calculate counts
+    // Counts
     const [totalProducts, activeProducts, lowStockCount, overStockCount] =
       await Promise.all([
         Product.countDocuments(),
         Product.countDocuments({ isActive: true }),
-        Product.countDocuments({
-          $expr: { $lt: ["$currentStock", "$minimumStock"] },
-        }),
-        Product.countDocuments({
-          $expr: { $gt: ["$currentStock", "$maximumStock"] },
-        }),
+        Product.countDocuments({ $expr: { $lt: ["$currentStock", "$minimumStock"] } }),
+        Product.countDocuments({ $expr: { $gt: ["$currentStock", "$maximumStock"] } }),
       ]);
 
-    // Prepare response
-    res.json(
+    // ✅ Return proper Next.js Response
+     res.json(
       {
         totalProducts,
         activeProducts,
@@ -61,9 +52,11 @@ try {
     );
   } catch (error) {
     console.error("❌ Error fetching inventory analytics:", error);
-    res.json(
+     res.json(
       { error: "Failed to fetch inventory analytics", details: error.message },
       { status: 500 }
     );
   }
 });
+
+export default router;

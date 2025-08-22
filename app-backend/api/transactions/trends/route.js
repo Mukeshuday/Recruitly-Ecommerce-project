@@ -4,7 +4,7 @@ import StockTransaction from "../../../lib/models/StockTransaction.js";
 
 const router = express.Router();
 
-router.get("/api/transactions/trends",async(req,res) =>
+router.get("/",async(req,res) =>
 {
   try {
     await dbConnect();
