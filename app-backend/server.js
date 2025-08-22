@@ -18,11 +18,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ enable CORS for both local + deployed frontend
+// ✅ enable CORS for local + deployed frontend (using env variable for production)
 app.use(cors({
   origin: [
     "http://localhost:3000",
-    "https://your-vercel-project-name.vercel.app"  // 👈 update with your Vercel frontend domain
+    process.env.FRONTEND_URL || ""  // 👈 set this in Render dashboard
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
@@ -30,6 +30,7 @@ app.use(cors({
 
 app.use(express.json());
 
+// DB connection
 await dbConnect();
 
 // Routes
