@@ -10,19 +10,22 @@ import productsRoute from "../app-backend/api/products/route.js";
 import stockTransactionRoute from "../app-backend/api/stock-transactions/route.js";
 import suppliersRoute from "../app-backend/api/suppliers/route.js";
 import transactionRoute from "../app-backend/api/transactions/route.js";
-import inventoryRouter from "../app-backend/api/analytics/inventory/route.js"
-import categoriesRouter from "../app-backend/api/analytics/categories/route.js"
-import stockMovementsRouter from "../app-backend/api/analytics/stock-movements/route.js"
+import inventoryRouter from "../app-backend/api/analytics/inventory/route.js";
+import categoriesRouter from "../app-backend/api/analytics/categories/route.js";
+import stockMovementsRouter from "../app-backend/api/analytics/stock-movements/route.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ enable CORS for frontend (Next.js runs at 3000)
+// ✅ enable CORS for both local + deployed frontend
 app.use(cors({
-  origin: "http://localhost:3000", // allow requests only from your frontend
-  methods: ["GET", "POST", "PUT", "DELETE"], // allowed HTTP methods
-  credentials: true, // allow cookies/headers if needed
+  origin: [
+    "http://localhost:3000",
+    "https://your-vercel-project-name.vercel.app"  // 👈 update with your Vercel frontend domain
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
 }));
 
 app.use(express.json());
@@ -38,9 +41,9 @@ app.use("/api/analytics/stock-movements", stockMovementsRouter);
 app.use("/api/products", productsRoute);
 app.use("/api/suppliers", suppliersRoute);
 app.use("/api/stock-transactions", stockTransactionRoute);
-app.use("/api/transactions",transactionRoute)
+app.use("/api/transactions", transactionRoute);
 
-;app.get("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Backend api is running..!");
 });
 
