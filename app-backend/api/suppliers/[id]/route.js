@@ -4,49 +4,43 @@ import Supplier from '../../../lib/models/Supplier.js';
 
 const router = express.Router();
 
-router.use(async(req,res,next) =>{
-  try{
-    await dbConnect();
-    next();
-  }catch (err) {
-    return res.status(500).json({error:"Database connection failed.."});
-  }
-});
 
 router.get("/", async(req,res)=>{
-  await dbConnect();
   try {
+    await dbConnect();
     const supplier = await Supplier.findById(params.id).lean();
-    if (!supplier) return res.json({ error: 'Supplier not found' }, { status: 404 });
+    if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
     return res.json(supplier);
   } catch (err) {
-    return res.json({ error: err.message }, { status: 500 });
+    return res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/",async(req,res) =>{
-await dbConnect();
+router.put("/",async(req,res) =>{
   try {
-    const body = await req.json();
-    const updated = await Supplier.findByIdAndUpdate(params.id, body, {
+    await dbConnect();
+    const updated = await Supplier.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!updated) return res.json({ error: 'Supplier not found' }, { status: 404 });
+    if (!updated) return res.status(404).json({ error: 'Supplier not found' });
     return res.json(updated);
   } catch (err) {
-    return res.json({ error: err.message }, { status: 400 });
+    return res.status(400).json({ error: err.message });
   }
 });
 
 router.delete("/",async(req,res) => 
 {
-  await dbConnect();
   try {
-    const deleted = await Supplier.findByIdAndDelete(params.id);
-    if (!deleted) return res.json({ error: 'Supplier not found' }, { status: 404 });
+    await dbConnect();
+    const deleted = await Supplier.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Supplier not found' });
     return res.json({ ok: true });
   } catch (err) {
-    return res.json({ error: err.message }, { status: 500 });
+    return res.status(500).json({ error: err.message });
   }
 } );
+
+
+export default router;

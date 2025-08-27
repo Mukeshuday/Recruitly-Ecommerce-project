@@ -9,28 +9,28 @@ const router = express.Router();
 {
   await dbConnect();
   try {
+    await dbConnect();
     const suppliers = await Supplier.find().sort({ createdAt: -1 }).lean();
     return res.json(suppliers);
   } catch (err) {
-    return res.json({ error: err.message }, { status: 500 });
+    return res.status(500).json({ error: err.message });
   }
 });
 
 router.post("/",async(req,res) =>
 {
-  await dbConnect();
   try {
-    const body = await req.json();
-
+    await dbConnect();
+    const body = await req.body;
     // Validate required fields
     if (!body.name || !body.email) {
-      return res.json({ error: 'Name and Email are required' }, { status: 400 });
+      return res.status(400).json({ error: "Name and Email are required" });
     }
 
     const newSupplier = await Supplier.create(body);
-    return res.json(newSupplier, { status: 201 });
+    return res.status(201).json(newSupplier);
   } catch (err) {
-    return res.json({ error: err.message }, { status: 400 });
+    return res.status(400).json({ error: err.message });
   }
 });
 
