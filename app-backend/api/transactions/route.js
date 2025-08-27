@@ -4,25 +4,22 @@ import { dbConnect } from "../../lib/db.js";
 import Product from "../../lib/models/Product.js";
 import StockTransaction from "../../lib/models/StockTransaction.js";
 
-
 const router = express.Router();
 
 // ✅ CREATE a stock transaction
-router.post("/",async(req,res) => 
-{
+router.post("/", async (req, res) => {
   try {
     await dbConnect();
-    const body = await req.json();
+    const body = req.body;
     const { productId, type, quantity, reason, referenceId, performedBy, notes } = body;
 
     if (!productId || !type || !quantity || !reason) {
-      return res.json({ error: "Missing required fields" }, { status: 400 });
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Fetch product
     const product = await Product.findById(productId);
     if (!product) {
-      return res.json({ error: "Product not found" }, { status: 404 });
+      return res.status(404).json({ error: "Product not found" });
     }
 
     let stockChange = 0;
@@ -30,24 +27,23 @@ router.post("/",async(req,res) =>
       stockChange = quantity;
     } else if (type === "OUT") {
       if (product.currentStock < quantity) {
-        return res.json({ error: "Insufficient stock" }, { status: 400 });
+        return res.status(400).json({ error: "Insufficient stock" });
       }
       stockChange = -quantity;
     } else if (type === "ADJUSTMENT") {
       stockChange = quantity;
       if (product.currentStock + stockChange < 0) {
-        return res.json({ error: "Adjustment would result in negative stock" }, { status: 400 });
+        return res.status(400).json({ error: "Adjustment would result in negative stock" });
       }
     } else {
-      return res.json({ error: "Invalid transaction type" }, { status: 400 });
+      return res.status(400).json({ error: "Invalid transaction type" });
     }
 
-    // ✅ Update product stock without triggering full validation
+    // ✅ Update product stock
     await Product.findByIdAndUpdate(productId, {
       $inc: { currentStock: stockChange },
     });
 
-    // Save transaction
     const transaction = await StockTransaction.create({
       productId,
       type,
@@ -58,21 +54,19 @@ router.post("/",async(req,res) =>
       notes,
     });
 
-    return res.json({ success: true, transaction }, { status: 201 });
+    return res.status(201).json({ success: true, transaction });
   } catch (error) {
     console.error("Transaction POST error:", error);
-    return res.json({ error: "Internal server error" }, { status: 500 });
+    return res.status(500).json({ error: "Internal server error" });
   }
-}); 
-
+});
 
 // ✅ GET stock transactions (with filters)
-router.get("/",async(req,res) => 
-{
+router.get("/", async (req, res) => {
   try {
     await dbConnect();
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
     const productId = searchParams.get("productId");
     const type = searchParams.get("type");
     const startDate = searchParams.get("startDate");
@@ -93,11 +87,11 @@ router.get("/",async(req,res) =>
       .limit(limit)
       .populate("productId", "name currentStock unitPrice");
 
-    return res.json(transactions,{ status:200 });
+    return res.status(200).json(transactions);
   } catch (error) {
     console.error("Transaction GET error:", error);
-    return res.json({ error: "Internal server error" }, { status: 500 });
+    return res.status(500).json({ error: "Internal server error" });
   }
-}); 
+});
 
 export default router;

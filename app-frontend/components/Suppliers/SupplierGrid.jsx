@@ -20,6 +20,7 @@ export default function SupplierGrid() {
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
       const data = await res.json();
       setSuppliers(data);
+      console.log("Suppliers: ",data);
     } catch (err) {
       message.error(err.message || 'Failed to fetch suppliers');
     } finally {
@@ -31,12 +32,18 @@ export default function SupplierGrid() {
     fetchSuppliers();
   }, []);
 
-  const openModal = (supplier = null) => {
-    form.resetFields();
-    if (supplier) form.setFieldsValue(supplier);
-    setEditingSupplier(supplier);
-    setModalOpen(true);
-  };
+const openModal = (supplier = null) => {
+  form.resetFields();
+  if (supplier) {
+    form.setFieldsValue({
+      ...supplier,
+      address: supplier.address || {}  // ensure nested object exists
+    });
+  }
+  setEditingSupplier(supplier);
+  setModalOpen(true);
+};
+
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this supplier?')) return;
@@ -50,30 +57,39 @@ export default function SupplierGrid() {
     }
   };
 
-  const handleSubmit = async () => {
-    const values = await form.validateFields();
-    try {
-      if (editingSupplier) {
-        await fetch(`${API_URL}/api/suppliers/${editingSupplier._id}`, { // ✅ absolute
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values),
-        });
-        message.success('Supplier updated');
-      } else {
-        await fetch(`${API_URL}/api/suppliers`, { // ✅ absolute
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values),
-        });
-        message.success('Supplier added');
-      }
-      setModalOpen(false);
-      fetchSuppliers();
-    } catch (err) {
-      message.error(err.message || 'Operation failed');
+const handleSubmit = async () => {
+  const values = await form.validateFields();
+  try {
+    let res;
+    if (editingSupplier) {
+      res = await fetch(`${API_URL}/api/suppliers/${editingSupplier._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+      message.success("Supplier updated");
+    } else {
+      res = await fetch(`${API_URL}/api/suppliers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      if (!res.ok) throw new Error(`Add failed: ${res.status}`);
+      message.success("Supplier added");
     }
-  };
+
+    const data = await res.json(); // ✅ log backend response
+    console.log("API Response:", data);
+
+    setModalOpen(false);
+    fetchSuppliers();
+  } catch (err) {
+    console.error(err);
+    message.error(err.message || "Operation failed");
+  }
+};
+
 
   const columns = [
     { title: 'Name', dataIndex: 'name' },
@@ -109,7 +125,7 @@ export default function SupplierGrid() {
         title={editingSupplier ? 'Edit Supplier' : 'Add Supplier'}
         onOk={handleSubmit}
         onCancel={() => setModalOpen(false)}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form layout="vertical" form={form}>
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>

@@ -5,11 +5,12 @@ import StockTransaction from "../../../lib/models/StockTransaction.js";
 import Product from "../../../lib/models/Product.js";
 
 const router = express.Router();
-router.get("/",async(req,res) => {
-try {
+
+router.get("/", async (req, res) => {
+  try {
     await dbConnect();
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
     const from = searchParams.get("from");
     const to = searchParams.get("to");
     const product = searchParams.get("product");
@@ -48,10 +49,6 @@ try {
     if (product) {
       const productDoc = await Product.findById(product);
       if (productDoc) {
-        // Start with the current stock and walk backwards
-        let currentStock = productDoc.currentStock;
-
-        // Get all movements (oldest → newest)
         const transactions = await StockTransaction.find(match)
           .sort({ createdAt: 1 })
           .lean();
@@ -70,16 +67,13 @@ try {
       }
     }
 
-    res.json(
-      {
-        dailyMovements, // grouped totals
-        stockTimeline, // cumulative stock trend
-      },
-      { status: 200 }
-    );
+    return res.status(200).json({
+      dailyMovements,
+      stockTimeline,
+    });
   } catch (error) {
     console.error("Error fetching stock movement analytics:", error);
-    res.json({ error: error.message }, { status: 500 });
+    return res.status(500).json({ error: error.message });
   }
 });
 

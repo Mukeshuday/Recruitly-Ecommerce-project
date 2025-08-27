@@ -9,10 +9,12 @@ import analyticsRoute from "../app-backend/api/analytics/route.js";
 import productsRoute from "../app-backend/api/products/route.js";
 import stockTransactionRoute from "../app-backend/api/stock-transactions/route.js";
 import suppliersRoute from "../app-backend/api/suppliers/route.js";
+import suppliersIdRoute from "../app-backend/api/suppliers/[id]/route.js"
 import transactionRoute from "../app-backend/api/transactions/route.js";
 import inventoryRouter from "../app-backend/api/analytics/inventory/route.js";
 import categoriesRouter from "../app-backend/api/analytics/categories/route.js";
 import stockMovementsRouter from "../app-backend/api/analytics/stock-movements/route.js";
+import stockTrendsRouter from "../app-backend/api/transactions/trends/route.js"
 
 dotenv.config();
 const app = express();
@@ -41,8 +43,10 @@ app.use("/api/analytics/categories", categoriesRouter);
 app.use("/api/analytics/stock-movements", stockMovementsRouter);
 app.use("/api/products", productsRoute);
 app.use("/api/suppliers", suppliersRoute);
+app.use("/api/suppliers", suppliersIdRoute);
 app.use("/api/stock-transactions", stockTransactionRoute);
 app.use("/api/transactions", transactionRoute);
+app.use("/api/transactions/trends", stockTrendsRouter);
 
 app.get("/", (req, res) => {
   res.send("Backend api is running..!");

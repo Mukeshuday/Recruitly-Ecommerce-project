@@ -21,7 +21,7 @@ router.post("/",async(req,res) =>
 {
   try {
     await dbConnect();
-    const body = await req.body;
+    const body =  req.body;
     // Validate required fields
     if (!body.name || !body.email) {
       return res.status(400).json({ error: "Name and Email are required" });

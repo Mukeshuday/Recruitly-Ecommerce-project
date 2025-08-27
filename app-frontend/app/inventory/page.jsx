@@ -78,7 +78,7 @@ export default function InventoryPage() {
         params.append("from", filters.dateRange[0].format("YYYY-MM-DD"));
         params.append("to", filters.dateRange[1].format("YYYY-MM-DD"));
       }
-      if (filters.product) params.append("product", filters.product);
+      if (filters.product) params.append("productId", filters.product);
       if (filters.type) params.append("type", filters.type);
 
       const [statsRes, trendsRes, categoriesRes, transactionsRes] =
