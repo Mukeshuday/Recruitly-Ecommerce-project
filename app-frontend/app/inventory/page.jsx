@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Pie } from "@ant-design/plots";
 import {
   Table,
   DatePicker,
@@ -16,7 +17,7 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import { Line, Pie } from "@ant-design/charts";
+import { Line } from "@ant-design/charts";
 import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
@@ -206,22 +207,31 @@ export default function InventoryPage() {
     color: ["#52c41a", "#ff4d4f", "#fa8c16"],
   };
 
+  useEffect(() => {
+  fetch(`${API_URL}/api/analytics/categories`)
+    .then((res) => res.json())
+    .then((data) => setCategoriesData(data))
+    .catch((err) => console.error(err));
+  }, []);
+
+// ✅ Fix Pie Config
   const categoriesConfig = {
     appendPadding: 10,
     data: categoriesData.map((c) => ({
-      type: c.category,
-      value: c[categoryMetric] || 0,
+      category: c.category || "Unknown",
+      value: c[categoryMetric] || 0,   // dynamically pick based on selected metric
     })),
     angleField: "value",
-    colorField: "type",
-    radius: 0.9,
+    colorField: "category",
+    radius: 1,
     label: {
-      position: "inside",
-      offset: "-30%",
-      content: ({value}) => value,
-      style: { fontSize: 14, textAlign: "center" },
+      type: "outer",
+      content: "{name} {percentage}",
     },
+    interactions: [{ type: "element-active" }],
   };
+
+
 
   return (
     <div style={{ padding: 20 }}>
@@ -360,48 +370,48 @@ export default function InventoryPage() {
 
       <br />
 
-      {/* Categories Pie + Summary */}
-      <Card
-        title="Products by Category"
-        extra={
-          <Select
-            value={categoryMetric}
-            style={{ width: 200 }}
-            onChange={(val) => setCategoryMetric(val)}
-          >
-            <Option value="productCount">Products Count</Option>
-            <Option value="totalStock">Total Stock</Option>
-            <Option value="stockValue">Stock Value ($)</Option>
-            <Option value="potentialRevenue">Potential Revenue ($)</Option>
-            <Option value="lowStockCount">Low Stock Count</Option>
-          </Select>
-        }
+  <Card
+    title="Products by Category"
+    extra={
+      <Select
+        value={categoryMetric}
+        style={{ width: 200 }}
+        onChange={(val) => setCategoryMetric(val)}
       >
-        <Pie {...categoriesConfig} />
+        <Option value="productCount">Products Count</Option>
+        <Option value="totalStock">Total Stock</Option>
+        <Option value="stockValue">Stock Value ($)</Option>
+        <Option value="potentialRevenue">Potential Revenue ($)</Option>
+        <Option value="lowStockCount">Low Stock Count</Option>
+      </Select>
+    }
+    >
+    <Pie {...categoriesConfig} />
 
-        {/* Category Summary Table */}
-        <Table
-          dataSource={categoriesData.map((c, idx) => ({
-            key: idx,
-            category: c.category,
-            productCount: c.productCount,
-            totalStock: c.totalStock,
-            stockValue: c.stockValue,
-            potentialRevenue: c.potentialRevenue,
-            lowStockCount: c.lowStockCount,
-          }))}
-          columns={[
-            { title: "Category", dataIndex: "category", key: "category" },
-            { title: "Products", dataIndex: "productCount", key: "productCount" },
-            { title: "Total Stock", dataIndex: "totalStock", key: "totalStock" },
-            { title: "Stock Value ($)", dataIndex: "stockValue", key: "stockValue" },
-            { title: "Potential Revenue ($)", dataIndex: "potentialRevenue", key: "potentialRevenue" },
-            { title: "Low Stock", dataIndex: "lowStockCount", key: "lowStockCount" },
-          ]}
-          pagination={false}
-          style={{ marginTop: 20 }}
-        />
-      </Card>
+    {/* Category Summary Table */}
+    <Table
+      dataSource={categoriesData.map((c, idx) => ({
+        key: idx,
+        category: c.category,
+        productCount: c.productCount,
+        totalStock: c.totalStock,
+        stockValue: c.stockValue,
+        potentialRevenue: c.potentialRevenue,
+        lowStockCount: c.lowStockCount,
+      }))}
+      columns={[
+        { title: "Category", dataIndex: "category", key: "category" },
+        { title: "Products", dataIndex: "productCount", key: "productCount" },
+        { title: "Total Stock", dataIndex: "totalStock", key: "totalStock" },
+        { title: "Stock Value ($)", dataIndex: "stockValue", key: "stockValue" },
+        { title: "Potential Revenue ($)", dataIndex: "potentialRevenue", key: "potentialRevenue" },
+        { title: "Low Stock", dataIndex: "lowStockCount", key: "lowStockCount" },
+      ]}
+      pagination={false}
+      style={{ marginTop: 20 }}
+    />
+  </Card>
+
     </div>
   );
 }
